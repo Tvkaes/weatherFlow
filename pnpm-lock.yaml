@@ -35,6 +35,9 @@ dependencies:
   three:
     specifier: ^0.182.0
     version: 0.182.0
+  weather-react-icons:
+    specifier: ^4.0.2
+    version: 4.0.2
   zustand:
     specifier: ^5.0.10
     version: 5.0.10(@types/react@19.2.9)(react@19.2.3)(use-sync-external-store@1.6.0)
@@ -1761,7 +1764,6 @@ packages:
 
   /js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
-    dev: true
 
   /js-yaml@4.1.1:
     resolution: {integrity: sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==}
@@ -1824,6 +1826,13 @@ packages:
   /lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
     dev: true
+
+  /loose-envify@1.4.0:
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
+    hasBin: true
+    dependencies:
+      js-tokens: 4.0.0
+    dev: false
 
   /lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
@@ -1914,6 +1923,11 @@ packages:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
     dev: true
 
+  /object-assign@4.1.1:
+    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
+    engines: {node: '>=0.10.0'}
+    dev: false
+
   /optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -2003,6 +2017,17 @@ packages:
     engines: {node: '>=6'}
     dev: true
 
+  /react-dom@17.0.2(react@17.0.2):
+    resolution: {integrity: sha512-s4h96KtLDUQlsENhMn1ar8t2bEa+q/YAtj8pPPdIjPDGBDIVNsrD9aXNWqspUe6AzKCIG0C1HZZLqLV7qpOBGA==}
+    peerDependencies:
+      react: 17.0.2
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+      react: 17.0.2
+      scheduler: 0.20.2
+    dev: false
+
   /react-dom@19.2.3(react@19.2.3):
     resolution: {integrity: sha512-yELu4WmLPw5Mr/lmeEpox5rw3RETacE++JgHqQzd2dg+YbJuat3jH4ingc+WPZhxaoFzdv9y33G+F7Nl5O0GBg==}
     peerDependencies:
@@ -2028,6 +2053,14 @@ packages:
     dependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
+    dev: false
+
+  /react@17.0.2:
+    resolution: {integrity: sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==}
+    engines: {node: '>=0.10.0'}
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
     dev: false
 
   /react@19.2.3:
@@ -2079,6 +2112,13 @@ packages:
       '@rollup/rollup-win32-x64-msvc': 4.56.0
       fsevents: 2.3.3
     dev: true
+
+  /scheduler@0.20.2:
+    resolution: {integrity: sha512-2eWfGgAqqWFGqtdMmcL5zCMK1U8KlXv8SQFGglL3CEtd0aDVDWgeF/YoCmvln55m5zSk3J/20hTaSBeSObsQDQ==}
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+    dev: false
 
   /scheduler@0.27.0:
     resolution: {integrity: sha512-eNv+WrVbKu1f3vbYJT/xtiF5syA5HPIMtf9IgY/nKg0sWqzAUEvqY/xm7OcZc/qafLx/iO9FgOmeSAp4v5ti/Q==}
@@ -2340,6 +2380,14 @@ packages:
       fsevents: 2.3.3
     dev: true
 
+  /weather-react-icons@4.0.2:
+    resolution: {integrity: sha512-Atl63fbAHM5FF/7Tl9Hv9ueao5Os4x8FUQOXruBOhQKESfzbA4k061mKapdXm2Vm8g2UrhwYq5c4ybS2ekhZOw==}
+    dependencies:
+      react: 17.0.2
+      react-dom: 17.0.2(react@17.0.2)
+      weather-icons: github.com/erikflowers/weather-icons/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed
+    dev: false
+
   /webgl-constants@1.1.1:
     resolution: {integrity: sha512-LkBXKjU5r9vAW7Gcu3T5u+5cvSvh5WwINdr0C+9jpzVB41cjQAP5ePArDtk/WHYdVj0GefCgM73BA7FlIiNtdg==}
     dev: false
@@ -2423,4 +2471,10 @@ packages:
       '@types/react': 19.2.9
       react: 19.2.3
       use-sync-external-store: 1.6.0(react@19.2.3)
+    dev: false
+
+  github.com/erikflowers/weather-icons/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed:
+    resolution: {tarball: https://codeload.github.com/erikflowers/weather-icons/tar.gz/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed}
+    name: weather-icons
+    version: 2.0.12
     dev: false
