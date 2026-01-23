@@ -1,0 +1,7 @@
+/* App-level styles - most styles are in component CSS files */
+.app {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
