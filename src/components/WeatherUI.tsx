@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useLayoutEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { useWeatherStore } from '../store/weatherStore';
 import { useWeatherSystem } from '../hooks/useWeatherSystem';
@@ -66,7 +66,7 @@ const LoadingPortal = () => {
 };
 
 export const WeatherUI = () => {
-  const { rawWeather, normalized, atmosphere, location, isLoading, headline, mood, error, setError } = useWeatherStore();
+  const { rawWeather, normalized, atmosphere, location, isLoading, headline, mood, error, setError, activeDate } = useWeatherStore();
   const { searchLocation, refresh } = useWeatherSystem();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -210,7 +210,9 @@ export const WeatherUI = () => {
           opacity: 1,
           duration: 0.45,
           ease: 'power3.out',
-          onUpdate: () => gsap.set(wrapper, { pointerEvents: 'auto' }),
+          onUpdate: () => {
+            gsap.set(wrapper, { pointerEvents: 'auto' });
+          },
           onComplete: () => {
             wrapper.style.width = 'auto';
             gsap.set(wrapper, { pointerEvents: 'auto' });
@@ -255,6 +257,10 @@ export const WeatherUI = () => {
       setIsSearchOpen(false);
     }
   };
+
+  const selectedDateLabel = activeDate
+    ? new Date(activeDate).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
+    : 'Hoy';
 
   if (isLoading && !rawWeather) {
     return (
@@ -352,6 +358,10 @@ export const WeatherUI = () => {
           </div>
 
           <div className="weather-details">
+            <div className="weather-detail date-detail">
+              <span className="detail-label">Fecha</span>
+              <span className="detail-value">{selectedDateLabel}</span>
+            </div>
             <div className="weather-detail">
               <span className="detail-label">Humidity</span>
               <span className="detail-value">{rawWeather.humidity}%</span>

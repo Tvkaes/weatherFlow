@@ -82,6 +82,7 @@ interface WeatherStore {
   isLoading: boolean;
   error: string | null;
   lastUpdated: Date | null;
+  activeDate: string | null;
 
   // Forecasts
   hourlyForecast: HourlyForecast[];
@@ -103,6 +104,7 @@ interface WeatherStore {
   setLocation: (lat: number, lon: number, name: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setActiveDate: (date: string | null) => void;
 }
 
 const normalizeValue = (value: number, min: number, max: number): number => {
@@ -399,6 +401,7 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
   isLoading: false,
   error: null,
   lastUpdated: null,
+  activeDate: null,
   hourlyForecast: [],
   dailyForecast: [],
   normalized: defaultNormalized,
@@ -452,5 +455,9 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
 
   setForecastData: (hourly: HourlyForecast[], daily: DailyForecast[]) => {
     set({ hourlyForecast: hourly, dailyForecast: daily });
+  },
+
+  setActiveDate: (date: string | null) => {
+    set({ activeDate: date });
   },
 }));
