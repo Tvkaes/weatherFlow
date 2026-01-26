@@ -91,83 +91,26 @@
   z-index: 100;
 }
 
-.loading-portal {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at center, rgba(20, 24, 40, 0.85), rgba(3, 6, 12, 0.95));
-  overflow: hidden;
+.loading-container--basic {
+  background: radial-gradient(circle at center, rgba(8, 10, 18, 0.92), rgba(4, 7, 12, 0.98));
+  gap: 1.75rem;
 }
 
-.portal-tunnel-layer {
-  position: absolute;
-  width: 200vmax;
-  height: 200vmax;
+.loading-ring {
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  animation: tunnelSpin 12s linear infinite;
-  mix-blend-mode: screen;
-}
-
-.portal-tunnel-layer--one {
-  animation-duration: 14s;
-  opacity: 0.25;
-}
-
-.portal-tunnel-layer--two {
-  animation-duration: 10s;
-  opacity: 0.18;
-}
-
-.portal-tunnel-layer--three {
-  animation-duration: 7s;
-  opacity: 0.12;
-}
-
-.portal-core {
-  width: 18vmax;
-  height: 18vmax;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.45), rgba(109, 185, 255, 0.2), transparent 70%);
-  box-shadow:
-    0 0 80px rgba(148, 213, 255, 0.4),
-    0 0 160px rgba(255, 255, 255, 0.2);
-  animation: portalCorePulse 3s ease-in-out infinite;
-}
-
-@keyframes tunnelSpin {
-  0% { transform: rotate(0deg) scale(1); }
-  50% { transform: rotate(180deg) scale(0.9); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes portalCorePulse {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(0.9); opacity: 0.7; }
-}
-
-.loading-orb {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, 
-    rgba(255, 255, 255, 0.8), 
-    rgba(255, 255, 255, 0.1));
-  box-shadow: 
-    0 0 60px rgba(255, 255, 255, 0.3),
-    inset 0 0 30px rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  border: 3px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.85);
+  border-right-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.25);
 }
 
 .loading-text {
-  margin-top: 2rem;
-  font-size: 0.875rem;
-  letter-spacing: 0.3em;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 /* Header */

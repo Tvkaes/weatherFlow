@@ -64,7 +64,7 @@ export const fetchPlaceSuggestions = async (query: string, signal?: AbortSignal)
   const params = new URLSearchParams({
     input: trimmed,
     key,
-    language: 'es',
+    language: 'en',
     types: '(cities)',
   });
 
@@ -96,7 +96,7 @@ export const fetchPlaceDetails = async (placeId: string, signal?: AbortSignal): 
   const params = new URLSearchParams({
     place_id: placeId,
     key,
-    language: 'es',
+    language: 'en',
     fields: 'geometry/location,name,formatted_address,address_components',
   });
 
@@ -118,7 +118,7 @@ export const fetchPlaceDetails = async (placeId: string, signal?: AbortSignal): 
   return {
     latitude: lat,
     longitude: lng,
-    name: data.result.name ?? data.result.formatted_address ?? 'Ubicación',
+    name: data.result.name ?? data.result.formatted_address ?? 'Location',
     formattedAddress: data.result.formatted_address,
     country: country?.long_name,
     admin1: admin1?.long_name,

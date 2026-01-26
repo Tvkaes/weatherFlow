@@ -10,7 +10,6 @@ import { useAlertSystem } from '@/hooks/useAlertSystem';
 import { useHeadlineAnimation } from '@/hooks/useHeadlineAnimation';
 import { usePortalReveal } from '@/hooks/usePortalReveal';
 import { AnimatedHeadline } from '@/components/AnimatedHeadline';
-import { LoadingPortal } from '@/components/LoadingPortal';
 import { WeatherAlerts } from '@/components/WeatherAlerts';
 import { WeatherStats } from '@/components/WeatherStats';
 
@@ -51,33 +50,25 @@ export const WeatherUI = () => {
 
   const selectedDateLabel = useMemo(() => (
     activeDate
-      ? new Date(activeDate).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
-      : 'Hoy'
+      ? new Date(activeDate).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' })
+      : 'Today'
   ), [activeDate]);
 
   if (isLoading && !rawWeather) {
     return (
-      <div className="loading-container">
-        <LoadingPortal />
+      <div className="loading-container loading-container--basic">
         <motion.div
-          className="loading-orb"
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
+          className="loading-ring"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: 'linear' }}
         />
         <motion.p
           className="loading-text"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
+          transition={{ duration: 0.8, repeat: Infinity, repeatType: 'reverse' }}
         >
-          Entering the atmospheric portal...
+          Calibrating weather...
         </motion.p>
       </div>
     );
@@ -131,7 +122,7 @@ export const WeatherUI = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Buscar una ciudad, estado o país"
+                placeholder="Search for a city, state or country"
                 className="search-input"
                 aria-autocomplete="list"
                 aria-expanded={suggestions.length > 0}
@@ -146,7 +137,7 @@ export const WeatherUI = () => {
             {isSearchOpen && (suggestions.length > 0 || isFetchingSuggestions) && (
               <ul id="search-suggestions" className="search-suggestions" role="listbox">
                 {isFetchingSuggestions && suggestions.length === 0 && (
-                  <li className="search-suggestions__loading">Buscando...</li>
+                  <li className="search-suggestions__loading">Searching...</li>
                 )}
                 {suggestions.map((suggestion, index) => (
                   <li
@@ -244,7 +235,7 @@ export const WeatherUI = () => {
           animate={{ opacity: 1 }}
         >
           <div className="loading-overlay__spinner" />
-          <span>Actualizando clima...</span>
+          <span>Updating weather...</span>
         </motion.div>
       )}
     </div>
