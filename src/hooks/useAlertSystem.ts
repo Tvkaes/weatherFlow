@@ -3,8 +3,8 @@ import gsap from 'gsap';
 import { useWeatherStore } from '../store/weatherStore';
 
 export const useAlertSystem = () => {
-  const { error, setError } = useWeatherStore();
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const setError = useWeatherStore((state) => state.setError);
+  const [alertMessage, setAlertMessage] = useState<string | null>(() => useWeatherStore.getState().error);
   const alertRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
 
@@ -36,10 +36,12 @@ export const useAlertSystem = () => {
   );
 
   useEffect(() => {
-    if (error) {
-      setAlertMessage(error);
-    }
-  }, [error]);
+    const unsubscribe = useWeatherStore.subscribe((state) => {
+      setAlertMessage(state.error);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (!alertMessage || !alertRef.current) return;

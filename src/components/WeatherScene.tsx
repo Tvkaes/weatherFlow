@@ -1,10 +1,11 @@
-import { Suspense, useEffect, useMemo } from 'react';
+import { Suspense, useMemo } from 'react';
 import * as THREE from 'three';
-import { Canvas, useThree } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { Preload } from '@react-three/drei';
 import { AtmosphereBackground } from './AtmosphereBackground';
 import { PostProcessing } from './PostProcessing';
 import { Atmosphere } from './weather/Atmosphere';
+import { DayNightCycleLights } from './DayNightCycleLights';
 import { useWeatherStore } from '../store/weatherStore';
 import './WeatherScene.css';
 
@@ -25,18 +26,13 @@ const mapWeatherCodeToCondition = (code: number): WeatherCondition => {
 
 const FogLayer = () => {
   const { atmosphere } = useWeatherStore();
-  const { scene } = useThree();
+  const density = useMemo(
+    () => THREE.MathUtils.lerp(0.001, 0.08, atmosphere.fogDensity),
+    [atmosphere.fogDensity]
+  );
+  const fog = useMemo(() => new THREE.FogExp2('#03050a', density), [density]);
 
-  useEffect(() => {
-    const density = THREE.MathUtils.lerp(0.001, 0.08, atmosphere.fogDensity);
-    const fog = new THREE.FogExp2('#03050a', density);
-    scene.fog = fog;
-    return () => {
-      scene.fog = null;
-    };
-  }, [atmosphere.fogDensity, scene]);
-
-  return null;
+  return <primitive attach="fog" object={fog} />;
 };
 
 export const WeatherScene = ({ variant = 'background' }: WeatherSceneProps) => {
@@ -96,6 +92,7 @@ export const WeatherScene = ({ variant = 'background' }: WeatherSceneProps) => {
       >
         <Suspense fallback={null}>
           <AtmosphereBackground />
+          <DayNightCycleLights />
           <Atmosphere
             mode={mode}
             windSpeed={windSpeed * 0.05}

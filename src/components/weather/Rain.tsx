@@ -7,6 +7,14 @@ import { useWeatherControls } from './controls';
 
 const DROP_COUNT = 6000;
 
+const createRandomGenerator = (seed: number) => {
+  let value = seed;
+  return () => {
+    value = (value * 1664525 + 1013904223) % 4294967296;
+    return value / 4294967296;
+  };
+};
+
 const RainMaterial = shaderMaterial(
   {
     uTime: 0,
@@ -38,6 +46,7 @@ export const Rain = () => {
   const materialRef = useRef<RainMaterialType>(null);
 
   const geometry = useMemo(() => {
+    const random = createRandomGenerator(0xcafebabe);
     const base = new THREE.PlaneGeometry(0.02, 0.35, 1, 4);
     const instanced = new THREE.InstancedBufferGeometry();
     instanced.instanceCount = DROP_COUNT;
@@ -51,12 +60,16 @@ export const Rain = () => {
     const phases = new Float32Array(DROP_COUNT);
 
     for (let i = 0; i < DROP_COUNT; i++) {
-      offsets[i * 3] = (Math.random() - 0.5) * 40;
-      offsets[i * 3 + 1] = (Math.random() - 0.5) * 50;
-      offsets[i * 3 + 2] = (Math.random() - 0.5) * 30;
+      const offsetX = random() - 0.5;
+      const offsetY = random() - 0.5;
+      const offsetZ = random() - 0.5;
 
-      randoms[i] = Math.random();
-      phases[i] = Math.random();
+      offsets[i * 3] = offsetX * 40;
+      offsets[i * 3 + 1] = offsetY * 50;
+      offsets[i * 3 + 2] = offsetZ * 30;
+
+      randoms[i] = random();
+      phases[i] = random();
     }
 
     instanced.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offsets, 3));

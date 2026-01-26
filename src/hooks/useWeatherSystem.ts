@@ -16,6 +16,7 @@ interface OpenMeteoResponse {
     precipitation: number;
     weather_code: number;
     is_day: number;
+    time: string;
   };
   hourly: {
     time: string[];
@@ -79,12 +80,28 @@ const selectRepresentativeIndex = (indices: number[], times: string[]): number |
   return indices[Math.floor(indices.length / 2)];
 };
 
-const deriveWeatherSnapshot = (date: string, data: OpenMeteoResponse): WeatherData | null => {
+const deriveWeatherSnapshot = (
+  date: string,
+  data: OpenMeteoResponse,
+  options?: { targetHour?: string | null }
+): WeatherData | null => {
   const dayIndex = data.daily.time.findIndex((d) => d === date);
   if (dayIndex === -1) return null;
 
   const hourlyIndices = findHourlyIndicesForDate(date, data.hourly.time);
-  const representativeIdx = selectRepresentativeIndex(hourlyIndices, data.hourly.time);
+  let representativeIdx: number | null = null;
+
+  if (options?.targetHour) {
+    const hourIdx = data.hourly.time.findIndex((time) => time === options.targetHour);
+    if (hourIdx !== -1) {
+      representativeIdx = hourIdx;
+    }
+  }
+
+  if (representativeIdx === null) {
+    representativeIdx = selectRepresentativeIndex(hourlyIndices, data.hourly.time);
+  }
+
   if (representativeIdx === null) return null;
 
   const [sunriseIso, sunsetIso] = [data.daily.sunrise[dayIndex], data.daily.sunset[dayIndex]];
@@ -101,6 +118,7 @@ const deriveWeatherSnapshot = (date: string, data: OpenMeteoResponse): WeatherDa
     isDay: data.hourly.is_day ? data.hourly.is_day[representativeIdx] === 1 : true,
     sunrise: sunriseIso.split('T')[1],
     sunset: sunsetIso.split('T')[1],
+    observationTime: data.hourly.time[representativeIdx],
   };
 };
 
@@ -118,19 +136,27 @@ export const useWeatherSystem = () => {
     hourlyForecast,
     dailyForecast,
     activeDate,
+    activeHour,
     setWeatherData,
     setForecastData,
+    setHourlyForecast,
     setLocation,
     setLoading,
     setError,
     setActiveDate,
+    setActiveHour,
   } = useWeatherStore();
 
   const intervalRef = useRef<number | null>(null);
   const activeControllerRef = useRef<AbortController | null>(null);
 
-  const fetchWeatherByCoords = useCallback(async (lat: number, lon: number, options?: { targetDate?: string | null }) => {
+  const fetchWeatherByCoords = useCallback(async (
+    lat: number,
+    lon: number,
+    options?: { targetDate?: string | null; targetHour?: string | null }
+  ) => {
     const targetDate = options?.targetDate ?? null;
+    const targetHour = options?.targetHour ?? null;
     setLoading(true);
 
     // Cancel any in-flight request to prevent race conditions
@@ -195,13 +221,33 @@ export const useWeatherSystem = () => {
 
       const data: OpenMeteoResponse = await response.json();
 
+      const mapHourlyRange = (startIndex = 0, endIndex = data.hourly.time.length): HourlyForecast[] =>
+        data.hourly.time.slice(startIndex, endIndex).map((time, offset) => {
+          const absoluteIdx = startIndex + offset;
+          return {
+            time: formatHour(time),
+            isoTime: time,
+            temperature: data.hourly.temperature_2m[absoluteIdx],
+            weatherCode: data.hourly.weather_code[absoluteIdx],
+            precipitation: data.hourly.precipitation[absoluteIdx],
+            humidity: data.hourly.relative_humidity_2m[absoluteIdx],
+            windSpeed: data.hourly.wind_speed_10m[absoluteIdx],
+            isDay: data.hourly.is_day ? data.hourly.is_day[absoluteIdx] === 1 : undefined,
+            observationTime: time,
+          };
+        });
+
       if (targetDate) {
-        const snapshot = deriveWeatherSnapshot(targetDate, data);
+        const snapshot = deriveWeatherSnapshot(targetDate, data, { targetHour });
         if (!snapshot) {
           throw new Error('No weather data for selected date');
         }
         setWeatherData(snapshot);
         setActiveDate(targetDate);
+        setActiveHour(targetHour ?? null);
+
+        const hourlyData = mapHourlyRange();
+        setHourlyForecast(hourlyData);
       } else {
         // Set current weather
         setWeatherData({
@@ -216,21 +262,12 @@ export const useWeatherSystem = () => {
           isDay: data.current.is_day === 1,
           sunrise: data.daily.sunrise[0].split('T')[1],
           sunset: data.daily.sunset[0].split('T')[1],
+          observationTime: data.current.time,
         });
 
         // Process hourly forecast (next 24 hours)
         const currentHour = new Date().getHours();
-        const hourlyData: HourlyForecast[] = data.hourly.time
-          .slice(currentHour, currentHour + 24)
-          .map((time, i) => ({
-            time: formatHour(time),
-            isoTime: time,
-            temperature: data.hourly.temperature_2m[currentHour + i],
-            weatherCode: data.hourly.weather_code[currentHour + i],
-            precipitation: data.hourly.precipitation[currentHour + i],
-            humidity: data.hourly.relative_humidity_2m[currentHour + i],
-            windSpeed: data.hourly.wind_speed_10m[currentHour + i],
-          }));
+        const hourlyData = mapHourlyRange(currentHour, currentHour + 24);
 
         // Process daily forecast (7 days)
         const dailyData: DailyForecast[] = data.daily.time
@@ -248,6 +285,7 @@ export const useWeatherSystem = () => {
 
         setForecastData(hourlyData, dailyData);
         setActiveDate(null);
+        setActiveHour(null);
       }
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -261,7 +299,7 @@ export const useWeatherSystem = () => {
         setLoading(false);
       }
     }
-  }, [setWeatherData, setForecastData, setLoading, setError]);
+  }, [setWeatherData, setForecastData, setHourlyForecast, setLoading, setError, setActiveDate, setActiveHour]);
 
   const searchLocation = useCallback(async (query: string) => {
     try {
@@ -288,7 +326,15 @@ export const useWeatherSystem = () => {
       setError(err instanceof Error ? err.message : 'Failed to search location');
       setLoading(false);
     }
-  }, [fetchWeatherByCoords, setLocation, setError]);
+  }, [fetchWeatherByCoords, setLocation, setError, setLoading]);
+
+  const searchLocationByCoords = useCallback(
+    async (latitude: number, longitude: number, label: string) => {
+      setLocation(latitude, longitude, label);
+      await fetchWeatherByCoords(latitude, longitude);
+    },
+    [fetchWeatherByCoords, setLocation]
+  );
 
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -316,18 +362,29 @@ export const useWeatherSystem = () => {
 
   const refresh = useCallback(() => {
     if (location) {
-      fetchWeatherByCoords(location.lat, location.lon, { targetDate: activeDate });
+      fetchWeatherByCoords(location.lat, location.lon, { targetDate: activeDate, targetHour: activeHour });
     }
-  }, [location, fetchWeatherByCoords, activeDate]);
+  }, [location, fetchWeatherByCoords, activeDate, activeHour]);
 
   const loadDateWeather = useCallback(
     (date: string | null) => {
       if (!location) return;
+      setActiveHour(null);
       if (!date) {
         fetchWeatherByCoords(location.lat, location.lon);
       } else {
         fetchWeatherByCoords(location.lat, location.lon, { targetDate: date });
       }
+    },
+    [location, fetchWeatherByCoords, setActiveHour]
+  );
+
+  const loadHourWeather = useCallback(
+    (isoTime: string) => {
+      if (!location) return;
+      const [date] = isoTime.split('T');
+      if (!date) return;
+      fetchWeatherByCoords(location.lat, location.lon, { targetDate: date, targetHour: isoTime });
     },
     [location, fetchWeatherByCoords]
   );
@@ -336,7 +393,7 @@ export const useWeatherSystem = () => {
   useEffect(() => {
     if (location) {
       intervalRef.current = window.setInterval(() => {
-        fetchWeatherByCoords(location.lat, location.lon, { targetDate: activeDate });
+        fetchWeatherByCoords(location.lat, location.lon, { targetDate: activeDate, targetHour: activeHour });
       }, 5 * 60 * 1000);
     }
 
@@ -345,7 +402,7 @@ export const useWeatherSystem = () => {
         clearInterval(intervalRef.current);
       }
     };
-  }, [location, fetchWeatherByCoords, activeDate]);
+  }, [location, fetchWeatherByCoords, activeDate, activeHour]);
 
   // Abort any in-flight request if this hook unmounts
   useEffect(() => {
@@ -359,7 +416,7 @@ export const useWeatherSystem = () => {
   // Initial load
   useEffect(() => {
     getCurrentLocation();
-  }, []);
+  }, [getCurrentLocation]);
 
   return {
     // Raw data
@@ -386,8 +443,10 @@ export const useWeatherSystem = () => {
     
     // Actions
     searchLocation,
+    searchLocationByCoords,
     getCurrentLocation,
     refresh,
     loadDateWeather,
+    loadHourWeather,
   };
 };

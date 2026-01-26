@@ -35,6 +35,12 @@ export const atmosphereFragmentShader = /* glsl */ `
   
   // Time phase: 0=night, 0.25=dawn, 0.5=day, 0.75=evening
   uniform float uTimePhase;
+  uniform float uSunVisible;
+  uniform float uSunStrength;
+  uniform vec2 uSunUv;
+  uniform float uMoonVisible;
+  uniform float uMoonStrength;
+  uniform vec2 uMoonUv;
   
   varying vec2 vUv;
   varying vec3 vPosition;
@@ -328,17 +334,31 @@ export const atmosphereFragmentShader = /* glsl */ `
       gradient = mix(gradient, gradient + vec3(0.06), clamp(uSnowIntensity, 0.0, 1.0) * 0.4);
     }
     
-    // ========== SUN GLOW ==========
-    if(uSunIntensity > 0.3 && uCloudDensity < 0.5) {
-      vec2 sunPos = vec2(0.7, 0.8 - (1.0 - uTimePhase) * 0.3);
-      float sunDist = length(uv - sunPos);
-      float sunGlow = smoothstep(0.4, 0.0, sunDist) * uSunIntensity * (1.0 - uCloudDensity);
-      vec3 sunColor = mix(vec3(1.0, 0.95, 0.8), vec3(1.0, 0.6, 0.3), uGoldenHour);
-      gradient += sunColor * sunGlow * 0.4;
+    // ========== SUN DISC & GLOW ==========
+    if(uSunVisible > 0.1) {
+      float sunDist = length(uv - uSunUv);
+      float core = smoothstep(0.12, 0.0, sunDist);
+      float halo = smoothstep(0.45, 0.05, sunDist);
+      vec3 sunCoreColor = mix(vec3(1.0, 0.95, 0.82), vec3(1.0, 0.72, 0.38), uGoldenHour);
+      vec3 sunHaloColor = mix(vec3(1.0, 0.9, 0.7), vec3(1.0, 0.75, 0.45), uGoldenHour * 0.8);
+      float sunEnergy = mix(0.35, 1.0, clamp(uSunStrength, 0.0, 1.0)) * (1.0 - uCloudDensity * 0.7);
+      gradient += sunCoreColor * core * sunEnergy;
+      gradient += sunHaloColor * halo * sunEnergy * 0.6;
     }
-    
-    // ========== STARS AT NIGHT (disabled - was causing grid artifacts) ==========
-    // Stars removed to prevent rectangular grid patterns
+
+    // ========== MOON DISC ==========
+    if(uMoonVisible > 0.05) {
+      float moonDist = length(uv - uMoonUv);
+      float moonCore = smoothstep(0.1, 0.0, moonDist);
+      float moonGlow = smoothstep(0.3, 0.05, moonDist);
+      vec3 moonColor = vec3(0.78, 0.84, 0.92);
+      vec3 moonHalo = vec3(0.35, 0.4, 0.6);
+      float moonEnergy = clamp(uMoonStrength * 1.2, 0.0, 1.0);
+      gradient += moonColor * moonCore * moonEnergy;
+      gradient += moonHalo * moonGlow * moonEnergy * 0.4;
+    }
+
+    // Stars intentionally removed per new art direction
     
     // ========== LIGHTNING (disabled - was causing flashing rectangles) ==========
     // Lightning removed to prevent flashing artifacts

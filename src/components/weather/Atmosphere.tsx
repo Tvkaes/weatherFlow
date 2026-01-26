@@ -1,11 +1,16 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { type ThreeElements } from '@react-three/fiber';
 import gsap from 'gsap';
 import { Clouds } from './Clouds';
 import { Rain } from './Rain';
 import { Snow } from './Snow';
 import { Lightning } from './Lightning';
-import { WeatherControlsContext, type WeatherControls } from './controls';
+import {
+  WeatherControlsContext,
+  WeatherControlsUpdateContext,
+  type WeatherControls,
+  type WeatherControlsUpdater,
+} from './controls';
 
 type AtmosphereProps = ThreeElements['group'] & {
   mode: 'rain' | 'snow' | 'storm' | 'clear' | 'foggy';
@@ -46,6 +51,10 @@ export const Atmosphere = ({
 
   const timeline = useMemo(() => gsap.timeline({ paused: true }), []);
 
+  const updateControls = useCallback<WeatherControlsUpdater>((key, value) => {
+    controls.current[key] = value;
+  }, []);
+
   useEffect(() => {
     timeline.clear();
     timeline.to(controls.current, {
@@ -73,13 +82,15 @@ export const Atmosphere = ({
 
   return (
     <WeatherControlsContext.Provider value={controls}>
-      <group {...groupProps}>
-        <Clouds />
-        {showRain && <Rain />}
-        {showSnow && <Snow />}
-        {showLightning && <Lightning />}
-        {/* Fog handled via scene.fog in parent */}
-      </group>
+      <WeatherControlsUpdateContext.Provider value={updateControls}>
+        <group {...groupProps}>
+          <Clouds />
+          {showRain && <Rain />}
+          {showSnow && <Snow />}
+          {showLightning && <Lightning />}
+          {/* Fog handled via scene.fog in parent */}
+        </group>
+      </WeatherControlsUpdateContext.Provider>
     </WeatherControlsContext.Provider>
   );
 };

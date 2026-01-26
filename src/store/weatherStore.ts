@@ -12,6 +12,7 @@ export interface WeatherData {
   isDay: boolean;
   sunrise: string;
   sunset: string;
+  observationTime?: string;
 }
 
 export interface HourlyForecast {
@@ -22,6 +23,8 @@ export interface HourlyForecast {
   precipitation: number;
   humidity: number;
   windSpeed: number;
+  isDay?: boolean;
+  observationTime?: string;
 }
 
 export interface DailyForecast {
@@ -83,6 +86,7 @@ interface WeatherStore {
   error: string | null;
   lastUpdated: Date | null;
   activeDate: string | null;
+  activeHour: string | null;
 
   // Forecasts
   hourlyForecast: HourlyForecast[];
@@ -101,10 +105,12 @@ interface WeatherStore {
   // Actions
   setWeatherData: (data: WeatherData) => void;
   setForecastData: (hourly: HourlyForecast[], daily: DailyForecast[]) => void;
+  setHourlyForecast: (hourly: HourlyForecast[]) => void;
   setLocation: (lat: number, lon: number, name: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setActiveDate: (date: string | null) => void;
+  setActiveHour: (isoTime: string | null) => void;
 }
 
 const normalizeValue = (value: number, min: number, max: number): number => {
@@ -145,14 +151,14 @@ const getStormIntensity = (weatherCode: number): number => {
   return 0;
 };
 
-const calculateTimeOfDay = (sunrise: string, sunset: string): { 
+const calculateTimeOfDay = (sunrise: string, sunset: string, observationTime?: string): { 
   timeOfDay: number; 
   goldenHour: number; 
   blueHour: number;
   kelvin: number;
 } => {
-  const now = new Date();
-  const hours = now.getHours() + now.getMinutes() / 60;
+  const reference = observationTime ? new Date(observationTime) : new Date();
+  const hours = reference.getHours() + reference.getMinutes() / 60;
   const timeOfDay = hours / 24;
 
   const sunriseHour = parseInt(sunrise.split(':')[0]) + parseInt(sunrise.split(':')[1]) / 60;
@@ -374,6 +380,8 @@ const defaultNormalized: NormalizedWeather = {
   blueHour: 0,
 };
 
+// Note: stars must remain visible at night regardless of cloud cover
+// (handled in atmosphere shader; keep this normalized state in sync)
 const defaultAtmosphere: AtmosphericState = {
   noiseFrequency: 1.0,
   noiseAmplitude: 0.5,
@@ -402,6 +410,7 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
   error: null,
   lastUpdated: null,
   activeDate: null,
+  activeHour: null,
   hourlyForecast: [],
   dailyForecast: [],
   normalized: defaultNormalized,
@@ -410,7 +419,7 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
   headline: 'Atmospheric intelligence',
 
   setWeatherData: (data: WeatherData) => {
-    const timeData = calculateTimeOfDay(data.sunrise, data.sunset);
+    const timeData = calculateTimeOfDay(data.sunrise, data.sunset, data.observationTime);
     
     const normalized: NormalizedWeather = {
       temperature: normalizeValue(data.temperature, -20, 45),
@@ -457,7 +466,15 @@ export const useWeatherStore = create<WeatherStore>((set) => ({
     set({ hourlyForecast: hourly, dailyForecast: daily });
   },
 
+  setHourlyForecast: (hourly: HourlyForecast[]) => {
+    set({ hourlyForecast: hourly });
+  },
+
   setActiveDate: (date: string | null) => {
     set({ activeDate: date });
+  },
+
+  setActiveHour: (isoTime: string | null) => {
+    set({ activeHour: isoTime });
   },
 }));

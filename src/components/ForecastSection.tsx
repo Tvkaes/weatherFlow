@@ -7,14 +7,34 @@ import { useWeatherSystem } from '../hooks/useWeatherSystem';
 import { getWeatherIconClass } from '../utils/weatherIcon';
 import './ForecastSection.css';
 
-const HourlyCard = ({ hour, index }: { hour: HourlyForecast; index: number }) => {
-  const iconMeta = getWeatherIconClass(hour.weatherCode, true);
+const HourlyCard = ({
+  hour,
+  index,
+  isActive,
+  onSelect,
+}: {
+  hour: HourlyForecast;
+  index: number;
+  isActive: boolean;
+  onSelect: () => void;
+}) => {
+  const iconMeta = getWeatherIconClass(hour.weatherCode, hour.isDay);
   return (
     <motion.div
-      className="forecast-card hourly-card"
+      className={`forecast-card hourly-card ${isActive ? 'is-active' : ''}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.4 }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isActive}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
     >
       <span className="forecast-time">{hour.time}</span>
       <span className={`forecast-icon ${iconMeta.className}`} aria-hidden />
@@ -69,10 +89,10 @@ const DailyCard = ({
 };
 
 export const ForecastSection = () => {
-  const { hourlyForecast, dailyForecast } = useWeatherStore();
+  const { hourlyForecast, dailyForecast, activeHour } = useWeatherStore();
   const hourlyRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
-  const { loadDateWeather, activeDate } = useWeatherSystem();
+  const { loadDateWeather, loadHourWeather, activeDate } = useWeatherSystem();
 
   useEffect(() => {
     if (sectionRef.current && hourlyForecast.length > 0) {
@@ -95,7 +115,13 @@ export const ForecastSection = () => {
           <h3 className="forecast-title">Hourly</h3>
           <div ref={hourlyRef} className="forecast-scroll hourly-scroll">
             {hourlyForecast.map((hour, i) => (
-              <HourlyCard key={hour.time + i} hour={hour} index={i} />
+              <HourlyCard
+                key={hour.isoTime ?? `${hour.time}-${i}`}
+                hour={hour}
+                index={i}
+                isActive={activeHour === hour.isoTime}
+                onSelect={() => loadHourWeather(hour.isoTime)}
+              />
             ))}
           </div>
         </div>

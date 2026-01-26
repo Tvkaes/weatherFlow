@@ -7,6 +7,14 @@ import { useWeatherControls } from './controls';
 
 const FLAKE_COUNT = 6000;
 
+const createRandomGenerator = (seed: number) => {
+  let value = seed;
+  return () => {
+    value = (value * 1664525 + 1013904223) % 4294967296;
+    return value / 4294967296;
+  };
+};
+
 const SnowMaterial = shaderMaterial(
   {
     uTime: 0,
@@ -34,6 +42,7 @@ export const Snow = () => {
   const materialRef = useRef<SnowMaterialType>(null);
 
   const geometry = useMemo(() => {
+    const random = createRandomGenerator(0xdeadbeef);
     const base = new THREE.CircleGeometry(0.12, 32);
     const instanced = new THREE.InstancedBufferGeometry();
     instanced.instanceCount = FLAKE_COUNT;
@@ -47,13 +56,17 @@ export const Snow = () => {
     const seeds = new Float32Array(FLAKE_COUNT);
 
     for (let i = 0; i < FLAKE_COUNT; i++) {
-      offsets[i * 3] = (Math.random() - 0.5) * 40;
-      offsets[i * 3 + 1] = Math.random() * 25;
-      offsets[i * 3 + 2] = (Math.random() - 0.5) * 10;
+      const offsetX = random() - 0.5;
+      const offsetY = random();
+      const offsetZ = random() - 0.5;
 
-      scales[i] = 0.5 + Math.random() * 0.6;
-      phases[i] = Math.random() * Math.PI * 2;
-      seeds[i] = Math.random();
+      offsets[i * 3] = offsetX * 40;
+      offsets[i * 3 + 1] = offsetY * 25;
+      offsets[i * 3 + 2] = offsetZ * 10;
+
+      scales[i] = 0.5 + random() * 0.6;
+      phases[i] = random() * Math.PI * 2;
+      seeds[i] = random();
     }
 
     instanced.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offsets, 3));

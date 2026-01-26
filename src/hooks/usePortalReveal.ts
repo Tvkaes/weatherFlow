@@ -1,19 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { WeatherData } from '../store/weatherStore';
 
 export const usePortalReveal = (rawWeather: WeatherData | null, isLoading: boolean) => {
   const [portalOpen, setPortalOpen] = useState(false);
+  const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (rawWeather && !portalOpen) {
-      const timeout = window.setTimeout(() => setPortalOpen(true), 200);
-      return () => window.clearTimeout(timeout);
+    if (timeoutRef.current) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
 
-    if (!isLoading && !rawWeather) {
-      setPortalOpen(false);
-    }
-  }, [rawWeather, portalOpen, isLoading]);
+    const shouldOpen = Boolean(rawWeather);
+    const delay = shouldOpen ? 200 : 0;
+
+    timeoutRef.current = window.setTimeout(() => {
+      setPortalOpen(shouldOpen && !isLoading);
+      timeoutRef.current = null;
+    }, delay);
+
+    return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [rawWeather, isLoading]);
 
   return portalOpen;
 };
