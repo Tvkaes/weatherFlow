@@ -14,7 +14,22 @@ The interface dissolves into pure atmospheric sensation. Every pixel responds to
 
 ## Architecture
 
-```
+### WeatherUI Composition
+
+WeatherUI se divide en componentes altamente enfocados para mantener la accesibilidad y la mantenibilidad:
+
+| Componente | Responsabilidad |
+|------------|-----------------|
+| `LocationControls` | Encabezado con búsqueda inline, sugerencias geocodificadas y acciones de refresco |
+| `AnimatedHeadline` + `useHeadlineAnimation` | Tipografía variable que responde a la velocidad del viento |
+| `WeatherStats` | Métricas actuales + barras de progreso accesibles |
+| `AtmosphericSummary` | Resumen Kelvin / condición / fase con animaciones suaves |
+| `ForecastPanel` | Contenedor semántico para `ForecastSection` y su jerarquía de encabezados |
+| `AlertStack` | Región `aria-live` que orquesta `WeatherAlerts` y reintentos |
+| `WeatherFooter` | Indicador de luz (Golden/Blue/Night) + mood dinámico |
+| `LoadingOverlay` | Superposición reutilizable para estados de refresco |
+
+> Tip: cada componente reside en `src/components/` y puede probarse individualmente. El archivo `WeatherUI.tsx` ahora actúa solo como orquestador de layout.
 ┌─────────────────────────────────────────────────────────────┐
 │                     Open-Meteo API                          │
 └─────────────────────────┬───────────────────────────────────┘

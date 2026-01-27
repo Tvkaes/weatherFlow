@@ -38,6 +38,9 @@ dependencies:
   weather-react-icons:
     specifier: ^4.0.2
     version: 4.0.2
+  web-vitals:
+    specifier: ^5.1.0
+    version: 5.1.0
   zustand:
     specifier: ^5.0.10
     version: 5.0.10(@types/react@19.2.9)(react@19.2.3)(use-sync-external-store@1.6.0)
@@ -4791,6 +4794,10 @@ packages:
       react: 17.0.2
       react-dom: 17.0.2(react@17.0.2)
       weather-icons: github.com/erikflowers/weather-icons/bb80982bf1f43f2d57f9dd753e7413bf88beb9ed
+    dev: false
+
+  /web-vitals@5.1.0:
+    resolution: {integrity: sha512-ArI3kx5jI0atlTtmV0fWU3fjpLmq/nD3Zr1iFFlJLaqa5wLBkUSzINwBPySCX/8jRyjlmy1Volw1kz1g9XE4Jg==}
     dev: false
 
   /webgl-constants@1.1.1:

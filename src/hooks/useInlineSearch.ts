@@ -15,7 +15,7 @@ interface UseInlineSearchOptions {
 
 const DEBOUNCE_MS = 200;
 
-type InlineSuggestion = {
+export type InlineSuggestion = {
   id: string;
   primary: string;
   secondary?: string;
