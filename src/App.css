@@ -5,3 +5,35 @@
   height: 100vh;
   overflow: hidden;
 }
+
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(8, 11, 18, 0.9);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  text-decoration: none;
+  transform: translateY(-4rem);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+  z-index: 50;
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  opacity: 1;
+  outline: none;
+}
+
+.canvas-fallback {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.08), transparent 55%),
+    radial-gradient(circle at 80% 10%, rgba(124, 175, 255, 0.15), transparent 45%),
+    linear-gradient(160deg, #05060c, #0f1320 70%);
+  filter: blur(0.5px);
+  transition: opacity 0.4s ease;
+}

@@ -100,24 +100,37 @@ export const WeatherUI = () => {
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
+        role="banner"
       >
-        <div className="location-cluster">
+        <nav className="location-cluster" aria-label="Location controls">
           <div className="location-info">
             <button 
               className="search-toggle"
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               aria-expanded={isSearchOpen}
+              aria-controls="search-panel"
             >
-              <span className="location-icon">◎</span>
-              <span className="location-name">{location?.name || 'Unknown'}</span>
+              <span className="location-icon" aria-hidden>◎</span>
+              <span className="location-name">{location?.name || 'Unknown location'}</span>
+              <span className="visually-hidden">Toggle location search</span>
             </button>
           </div>
 
-          <div ref={searchInlineRef} className="search-inline" aria-hidden={!isSearchOpen}>
-            <form className="search-form search-form--inline" onSubmit={handleSearch}>
-              <span className="search-input-icon">⌕</span>
+          <section
+            id="search-panel"
+            ref={searchInlineRef}
+            className="search-inline"
+            aria-hidden={!isSearchOpen}
+            aria-label="Inline location search"
+          >
+            <form className="search-form search-form--inline" onSubmit={handleSearch} role="search">
+              <span className="search-input-icon" aria-hidden>⌕</span>
+              <label htmlFor="location-search" className="visually-hidden">
+                Search for a city, state or country
+              </label>
               <input
                 ref={searchInputRef}
+                id="location-search"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -125,7 +138,7 @@ export const WeatherUI = () => {
                 placeholder="Search for a city, state or country"
                 className="search-input"
                 aria-autocomplete="list"
-                aria-expanded={suggestions.length > 0}
+                aria-expanded={isSearchOpen && suggestions.length > 0}
                 aria-controls="search-suggestions"
                 aria-activedescendant={
                   activeIndex >= 0 && suggestions[activeIndex]
@@ -164,40 +177,47 @@ export const WeatherUI = () => {
                 ))}
               </ul>
             )}
-          </div>
+          </section>
 
-          <button className="refresh-btn" onClick={refresh} disabled={isLoading}>
+          <button className="refresh-btn" onClick={refresh} disabled={isLoading} aria-label="Refresh weather data">
             <motion.span
               className="refresh-icon"
               animate={isLoading ? { rotate: 360 } : { rotate: 0 }}
               transition={{ duration: 1, repeat: isLoading ? Infinity : 0, ease: 'linear' }}
+              aria-hidden
             >
               ↻
             </motion.span>
           </button>
-        </div>
+        </nav>
       </motion.header>
 
-      <main className="main-content">
-        <div className="weather-card">
+      <main id="weather-main" className="main-content" role="main">
+        <section className="weather-card" aria-labelledby="current-conditions-heading">
           <AnimatedHeadline ref={headlineRef} text={headline} />
+          <h2 id="current-conditions-heading" className="visually-hidden">
+            Current atmospheric snapshot
+          </h2>
 
           <WeatherStats
             iconClass={iconMeta.className}
             rawWeather={rawWeather}
             selectedDateLabel={selectedDateLabel}
           />
-        </div>
+        </section>
 
-        <motion.div 
+        <motion.section 
           className="atmospheric-data"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
+          aria-label="Atmospheric data overview"
         >
           <div className="atmo-item">
             <span className="atmo-label">Color Temp</span>
-            <span className="atmo-value">{kelvinDisplay}K</span>
+            <span className="atmo-value" aria-label={`Color temperature ${kelvinDisplay} Kelvin`}>
+              {kelvinDisplay}K
+            </span>
           </div>
           <div className="atmo-item">
             <span className="atmo-label">Condition</span>
@@ -207,25 +227,30 @@ export const WeatherUI = () => {
             <span className="atmo-label">Phase</span>
             <span className="atmo-value">{atmosphere.timePhase}</span>
           </div>
-        </motion.div>
+        </motion.section>
 
-        <ForecastSection />
+        <section aria-labelledby="forecast-heading">
+          <h2 id="forecast-heading" className="section-heading">
+            Forecast insight
+          </h2>
+          <ForecastSection />
+        </section>
       </main>
 
-      <div className="alert-stack" aria-live="polite">
+      <section className="alert-stack" aria-live="polite" aria-label="Weather alerts">
         <WeatherAlerts message={alertMessage} alertRef={alertRef} onRetry={handleRetry} />
-      </div>
+      </section>
 
-      <footer className="footer">
-        <span className="time-indicator">
+      <footer className="footer" role="contentinfo">
+        <div className="time-indicator" aria-label="Light condition indicator">
           {normalized.goldenHour > 0.3 && '✦ Golden Hour'}
           {normalized.blueHour > 0.3 && '✧ Blue Hour'}
           {normalized.goldenHour <= 0.3 && normalized.blueHour <= 0.3 && (
             normalized.timeOfDay > 0.25 && normalized.timeOfDay < 0.75 ? '○ Day' : '● Night'
           )}
-        </span>
-        <span className="footer-credit">Powered by Open-Meteo API · Tvkaes · WeatherFlow</span>
-        <span className="mood-indicator">Mood: {mood}</span>
+        </div>
+        <p className="footer-credit">Powered by Open-Meteo API · Tvkaes · WeatherFlow</p>
+        <p className="mood-indicator" aria-live="polite">Mood: {mood}</p>
       </footer>
 
       {isLoading && rawWeather && (

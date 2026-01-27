@@ -58,3 +58,22 @@ export const getWeatherIconClass = (code: number, isDay?: boolean) => {
   if (isDay === false) return { iconId, className: `wi wi-owm-night-${iconId}` };
   return { iconId, className: `wi wi-owm-${iconId}` };
 };
+
+export const describeWeatherCode = (code: number): string => {
+  if (code === 0) return 'Clear sky';
+  if (code === 1) return 'Mainly clear';
+  if (code === 2) return 'Partly cloudy';
+  if (code === 3) return 'Overcast conditions';
+  if (code === 45 || code === 48) return 'Foggy conditions';
+  if ([51, 53, 55].includes(code)) return 'Drizzle';
+  if (code === 56 || code === 57) return 'Freezing drizzle';
+  if ([61, 63, 65].includes(code)) return 'Rainfall';
+  if (code === 66 || code === 67) return 'Freezing rain';
+  if ([71, 73, 75].includes(code)) return 'Snowfall';
+  if (code === 77) return 'Snow grains';
+  if ([80, 81, 82].includes(code)) return 'Rain showers';
+  if (code === 85 || code === 86) return 'Snow showers';
+  if (code === 95) return 'Thunderstorm';
+  if (code === 96 || code === 99) return 'Severe thunderstorm with hail';
+  return 'Mixed weather conditions';
+};

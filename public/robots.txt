@@ -1,0 +1,10 @@
+# WeatherFlow robots.txt
+# Allow full crawl but reserve room for future sensitive paths
+User-agent: *
+Allow: /
+
+# Disallow potential future private endpoints
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://weatherflow.app/sitemap.xml

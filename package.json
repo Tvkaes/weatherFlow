@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "prebuild": "npm run sitemap",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -21,6 +23,7 @@
     "react-dom": "^19.2.0",
     "three": "^0.182.0",
     "weather-react-icons": "^4.0.2",
+    "web-vitals": "^5.1.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
