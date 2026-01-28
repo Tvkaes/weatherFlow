@@ -41,4 +41,26 @@ export default defineConfig({
       '@': path.resolve(__dirname, 'src'),
     },
   },
+  server: {
+    proxy: {
+      '/freellm': {
+        target: 'https://apifreellm.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/freellm/, ''),
+      },
+      '/open-meteo': {
+        target: 'https://api.open-meteo.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/open-meteo/, ''),
+      },
+      '/geocoding-api': {
+        target: 'https://geocoding-api.open-meteo.com',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (p) => p.replace(/^\/geocoding-api/, ''),
+      },
+    },
+  },
 });

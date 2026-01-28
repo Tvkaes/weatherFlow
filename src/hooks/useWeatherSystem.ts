@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useWeatherStore } from '../store/weatherStore';
 import type { HourlyForecast, DailyForecast, WeatherData } from '../store/weatherStore';
+import { reverseGeocodeLabel } from '@/utils/geocoding';
 
-const OPEN_METEO_API = 'https://api.open-meteo.com/v1/forecast';
-const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
+const OPEN_METEO_API = import.meta.env.DEV ? '/open-meteo/v1/forecast' : 'https://api.open-meteo.com/v1/forecast';
+const GEOCODING_API = import.meta.env.DEV
+  ? '/geocoding-api/v1/search'
+  : 'https://geocoding-api.open-meteo.com/v1/search';
 
 interface OpenMeteoResponse {
   current: {
@@ -72,6 +75,9 @@ const findHourlyIndicesForDate = (targetDate: string, times: string[]): number[]
     if (time.startsWith(targetDate)) acc.push(idx);
     return acc;
   }, []);
+
+const buildFallbackLabel = (lat: number, lon: number) => `Lat ${lat.toFixed(2)}, Lon ${lon.toFixed(2)}`;
+const isFallbackLabel = (label: string | null | undefined) => Boolean(label && label.startsWith('Lat '));
 
 const selectRepresentativeIndex = (indices: number[], times: string[]): number | null => {
   if (indices.length === 0) return null;
@@ -347,7 +353,15 @@ export const useWeatherSystem = () => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        setLocation(latitude, longitude, 'Current Location');
+        let resolvedLabel: string | null = null;
+        try {
+          resolvedLabel = await reverseGeocodeLabel(latitude, longitude, { language: 'es' });
+        } catch {
+          // swallow reverse geocoding errors, we'll fall back to coordinates
+        }
+
+        const finalLabel = resolvedLabel ?? buildFallbackLabel(latitude, longitude);
+        setLocation(latitude, longitude, finalLabel);
         await fetchWeatherByCoords(latitude, longitude);
       },
       (err) => {
@@ -412,6 +426,25 @@ export const useWeatherSystem = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!location || !isFallbackLabel(location.name)) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const resolved = await reverseGeocodeLabel(location.lat, location.lon, { language: 'es' });
+        if (cancelled || !resolved || resolved === location.name) return;
+        setLocation(location.lat, location.lon, resolved);
+      } catch {
+        // noop, we'll keep fallback label until a future attempt succeeds
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location, setLocation]);
 
   // Initial load
   useEffect(() => {

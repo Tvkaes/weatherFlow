@@ -1,4 +1,11 @@
-export const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
+const isDev = typeof import.meta !== 'undefined' && Boolean((import.meta as { env?: Record<string, string> }).env?.DEV);
+
+export const GEOCODING_API = isDev
+  ? '/geocoding-api/v1/search'
+  : 'https://geocoding-api.open-meteo.com/v1/search';
+export const REVERSE_GEOCODING_API = isDev
+  ? '/geocoding-api/v1/reverse'
+  : 'https://geocoding-api.open-meteo.com/v1/reverse';
 
 const normalizeText = (value: string) =>
   value
@@ -124,4 +131,131 @@ export const fetchGeocodingSuggestions = async (
       city: result.name,
     } satisfies GeocodingSuggestion;
   });
+};
+
+const reverseGeocodeOpenMeteo = async (
+  latitude: number,
+  longitude: number,
+  options?: { language?: string; signal?: AbortSignal }
+): Promise<string | null> => {
+  const params = new URLSearchParams({
+    latitude: latitude.toString(),
+    longitude: longitude.toString(),
+    language: options?.language ?? 'es',
+    format: 'json',
+  });
+
+  try {
+    const response = await fetch(`${REVERSE_GEOCODING_API}?${params.toString()}`, {
+      signal: options?.signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data: GeocodingResult = await response.json();
+    const entry = data.results?.[0];
+    if (!entry) return null;
+
+    const labelParts = [entry.name, entry.admin1, entry.country].filter((part) => Boolean(part && part.trim()));
+    return labelParts.join(', ') || entry.name || null;
+  } catch {
+    return null;
+  }
+};
+
+const reverseGeocodeBigDataCloud = async (
+  latitude: number,
+  longitude: number,
+  options?: { language?: string; signal?: AbortSignal }
+): Promise<string | null> => {
+  const url = new URL('https://api.bigdatacloud.net/data/reverse-geocode-client');
+  url.searchParams.set('latitude', latitude.toString());
+  url.searchParams.set('longitude', longitude.toString());
+  url.searchParams.set('localityLanguage', options?.language ?? 'es');
+
+  try {
+    const response = await fetch(url.toString(), { signal: options?.signal });
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    const city = data.city || data.locality || data.principalSubdivision || data.localityInfo?.informative?.[0]?.name;
+    const state = data.principalSubdivision ?? data.localityInfo?.administrative?.[0]?.name;
+    const country = data.countryName;
+    const labelParts = [city, state, country].filter((part) => Boolean(part && part.trim()));
+
+    if (labelParts.length) {
+      return labelParts.join(', ');
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const reverseGeocodeNominatim = async (
+  latitude: number,
+  longitude: number,
+  options?: { language?: string; signal?: AbortSignal }
+): Promise<string | null> => {
+  const url = new URL('https://nominatim.openstreetmap.org/reverse');
+  url.searchParams.set('lat', latitude.toString());
+  url.searchParams.set('lon', longitude.toString());
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('zoom', '10');
+  url.searchParams.set('accept-language', options?.language ?? 'es');
+
+  try {
+    const response = await fetch(url.toString(), {
+      signal: options?.signal,
+      headers: {
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    const address = data.address ?? {};
+    const city = address.city ?? address.town ?? address.village ?? address.municipality ?? address.county;
+    const state = address.state ?? address.region;
+    const country = address.country;
+    const labelParts = [city, state, country].filter((part) => Boolean(part && part.trim()));
+
+    if (labelParts.length) {
+      return labelParts.join(', ');
+    }
+
+    if (typeof data.display_name === 'string') {
+      const fallbackParts = data.display_name.split(',').map((part: string) => part.trim()).filter(Boolean).slice(0, 3);
+      if (fallbackParts.length) {
+        return fallbackParts.join(', ');
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+export const reverseGeocodeLabel = async (
+  latitude: number,
+  longitude: number,
+  options?: { language?: string; signal?: AbortSignal }
+): Promise<string | null> => {
+  const attempts = [reverseGeocodeOpenMeteo, reverseGeocodeBigDataCloud, reverseGeocodeNominatim];
+
+  for (const attempt of attempts) {
+    const label = await attempt(latitude, longitude, options);
+    if (label) return label;
+  }
+
+  return null;
 };
