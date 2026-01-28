@@ -1,9 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-
-const API_URL = import.meta.env.DEV ? '/freellm/api/v1/chat' : 'https://apifreellm.com/api/v1/chat';
-const API_KEY =
-  (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_FREE_LLM_API_KEY ??
-  (import.meta as { env?: Record<string, string | undefined> }).env?.API_KEY;
+import { FREE_LLM_API_KEY, FREE_LLM_API_URL } from '@/config/llm';
 
 export interface FreellmFeatures {
   unlimited: boolean;
@@ -41,7 +37,7 @@ export const useFreellmChat = (): UseFreellmChatResult => {
   const activeControllerRef = useRef<AbortController | null>(null);
 
   const sendMessage = useCallback(async (payload: FreellmRequestPayload) => {
-    if (!API_KEY) {
+    if (!FREE_LLM_API_KEY) {
       setError('Missing API key. Ensure VITE_FREE_LLM_API_KEY or API_KEY is defined in your .env');
       return null;
     }
@@ -56,11 +52,11 @@ export const useFreellmChat = (): UseFreellmChatResult => {
     setError(null);
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(FREE_LLM_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`,
+          Authorization: `Bearer ${FREE_LLM_API_KEY}`,
         },
         body: JSON.stringify({
           message: payload.message,

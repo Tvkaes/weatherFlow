@@ -133,6 +133,15 @@ npm run dev
 npm run build
 ```
 
+## Deployment (Vercel)
+
+1. Define your LLM key in `.env`/Vercel env vars:
+   ```bash
+   VITE_FREE_LLM_API_KEY="your_api_key_here"
+   ```
+2. Keep the included `vercel.json` so every request to `/freellm/*`, `/open-meteo/*` y `/geocoding-api/*` se reescriba hacia los dominios externos. Esto elimina errores de CORS porque el navegador sólo ve rutas relativas.
+3. Si ya tenías rewrites personalizados, mergea los arrays manualmente para conservarlos junto a estas reglas.
+
 ## UX Secrets
 
 - **Variable Font Animation**: Typography weight/slant responds to wind speed

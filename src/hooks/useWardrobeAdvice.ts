@@ -1,14 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import type { WeatherData, AtmosphericState } from '@/store/weatherStore';
 import { buildWardrobePrompt } from '@/utils/wardrobePrompt';
-
-const API_URL = import.meta.env.DEV
-  ? '/freellm/api/v1/chat'
-  : 'https://apifreellm.com/api/v1/chat';
-
-const API_KEY =
-  (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_FREE_LLM_API_KEY ??
-  (import.meta as { env?: Record<string, string | undefined> }).env?.API_KEY;
+import { FREE_LLM_API_KEY, FREE_LLM_API_URL } from '@/config/llm';
 
 export interface WardrobeAdviceState {
   advice: string;
@@ -86,7 +79,7 @@ export const useWardrobeAdvice = ({
       return;
     }
 
-    if (!API_KEY) {
+    if (!FREE_LLM_API_KEY) {
       setError('API key no configurada. Define VITE_FREE_LLM_API_KEY en .env');
       setAdvice(ERROR_MESSAGE);
       return;
@@ -107,11 +100,11 @@ export const useWardrobeAdvice = ({
     const signature = createWeatherSignature(weather, locationName);
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(FREE_LLM_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${API_KEY}`,
+          Authorization: `Bearer ${FREE_LLM_API_KEY}`,
         },
         body: JSON.stringify({ message: prompt }),
         signal: controller.signal,

@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/freellm/:match*",
+      "destination": "https://apifreellm.com/:match*"
+    },
+    {
+      "source": "/open-meteo/:match*",
+      "destination": "https://api.open-meteo.com/:match*"
+    },
+    {
+      "source": "/geocoding-api/:match*",
+      "destination": "https://geocoding-api.open-meteo.com/:match*"
+    }
+  ]
+}
