@@ -19,9 +19,22 @@ import { AlertStack } from '@/components/AlertStack';
 import { ForecastPanel } from '@/components/ForecastPanel';
 import { useWardrobeAdvice } from '@/hooks/useWardrobeAdvice';
 import { WardrobeAdviceCard } from '@/components/WardrobeAdviceCard';
+import { useSolarCycle } from '@/hooks/useSolarCycle';
+import { SolarCycleCard } from '@/components/SolarCycleCard';
+import { useComfortIndex } from '@/hooks/useComfortIndex';
+import { ComfortIndexCard } from '@/components/ComfortIndexCard';
 
 export const WeatherUI = () => {
-  const { rawWeather, normalized, atmosphere, location, isLoading, headline, mood, activeDate } = useWeatherStore();
+  const {
+    rawWeather,
+    normalized,
+    atmosphere,
+    location,
+    isLoading,
+    headline,
+    mood,
+    activeDate,
+  } = useWeatherStore();
   const { searchLocation, searchLocationByCoords, refresh } = useWeatherSystem();
   const {
     isOpen: isSearchOpen,
@@ -72,6 +85,9 @@ export const WeatherUI = () => {
       .map((chunk) => chunk.trim())
       .filter(Boolean);
   }, [wardrobeAdvice]);
+
+  const solarCycle = useSolarCycle(rawWeather);
+  const comfortIndex = useComfortIndex(rawWeather);
 
   const handleRetry = () => {
     refresh();
@@ -205,9 +221,9 @@ export const WeatherUI = () => {
         isLoading={isLoading}
       />
 
-      <div className="content-grid">
-        <main id="weather-main" className="main-content" role="main">
-          <section className="weather-card" aria-labelledby="current-conditions-heading">
+      <main id="weather-main" className="content-grid" role="main">
+        <section className="main-content" aria-label="Primary summary and forecast">
+          <article className="weather-card" aria-labelledby="current-conditions-heading">
             <AnimatedHeadline ref={headlineRef} text={headline} />
             <h2 id="current-conditions-heading" className="visually-hidden">
               Current atmospheric snapshot
@@ -218,27 +234,30 @@ export const WeatherUI = () => {
               rawWeather={rawWeather}
               selectedDateLabel={selectedDateLabel}
             />
-          </section>
+          </article>
 
           <AtmosphericSummary kelvinDisplay={kelvinDisplay} atmosphere={atmosphere} />
 
           <ForecastPanel />
-        </main>
+        </section>
 
-        <section className="secondary-panel" aria-label="Asistente de estilo">
+        <aside className="secondary-panel" aria-label="Assistant panel">
           <WardrobeAdviceCard
             adviceParagraphs={adviceParagraphs}
             adviceText={wardrobeAdvice}
             isLoading={isWardrobeLoading}
             className="secondary-panel__card"
           />
-        </section>
-      </div>
+
+          <SolarCycleCard data={solarCycle} />
+          <ComfortIndexCard data={comfortIndex} />
+        </aside>
+      </main>
 
       <button
         type="button"
         className="secondary-panel-fab"
-        aria-label="Abrir panel derecho"
+        aria-label="Open right panel"
         onClick={openSecondaryModal}
       >
         <span className="fab-icon" aria-hidden="true">💡</span>
@@ -251,7 +270,7 @@ export const WeatherUI = () => {
           className="secondary-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="Panel lateral"
+          aria-label="Side panel"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               closeSecondaryModal();

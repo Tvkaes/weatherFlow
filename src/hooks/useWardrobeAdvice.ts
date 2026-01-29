@@ -22,9 +22,9 @@ export interface UseWardrobeAdviceResult extends WardrobeAdviceState {
   clearNewAdviceFlag: () => void;
 }
 
-const DEFAULT_MESSAGE = 'Aún no hay sugerencia disponible.';
-const ERROR_MESSAGE = 'No se pudo obtener recomendación. Intenta nuevamente.';
-const NO_CONTENT_MESSAGE = 'La IA respondió sin texto utilizable.';
+const DEFAULT_MESSAGE = 'No suggestion available yet.';
+const ERROR_MESSAGE = 'Unable to fetch a recommendation. Please try again.';
+const NO_CONTENT_MESSAGE = 'The assistant returned no usable text.';
 
 const extractResponseText = (data: Record<string, unknown>): string | null => {
   const candidates = [

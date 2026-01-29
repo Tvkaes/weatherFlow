@@ -19,8 +19,8 @@ export const WardrobeAdviceCard = forwardRef<HTMLDivElement, WardrobeAdviceCardP
     <div ref={ref} className={classes}>
       <header className="wardrobe-card__header">
         <div>
-          <p className="wardrobe-card__eyebrow">Asistente de estilo</p>
-          <h3>Consejo para hoy</h3>
+          <p className="wardrobe-card__eyebrow">Assistant</p>
+          <h3>Advice for today</h3>
         </div>
         {showCloseButton && onClose ? (
           <button type="button" className="wardrobe-card__close" onClick={onClose}>
@@ -31,7 +31,7 @@ export const WardrobeAdviceCard = forwardRef<HTMLDivElement, WardrobeAdviceCardP
 
       <div className="wardrobe-card__body">
         {isLoading ? (
-          <p className="wardrobe-card__loading">Generando consejo...</p>
+          <p className="wardrobe-card__loading">Generating advice...</p>
         ) : adviceParagraphs.length === 0 ? (
           <p>{adviceText}</p>
         ) : (

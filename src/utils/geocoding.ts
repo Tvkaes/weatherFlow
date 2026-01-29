@@ -1,11 +1,5 @@
-const isDev = typeof import.meta !== 'undefined' && Boolean((import.meta as { env?: Record<string, string> }).env?.DEV);
-
-export const GEOCODING_API = isDev
-  ? '/geocoding-api/v1/search'
-  : 'https://geocoding-api.open-meteo.com/v1/search';
-export const REVERSE_GEOCODING_API = isDev
-  ? '/geocoding-api/v1/reverse'
-  : 'https://geocoding-api.open-meteo.com/v1/reverse';
+export const GEOCODING_API = '/geocoding-api/v1/search';
+export const REVERSE_GEOCODING_API = '/geocoding-api/v1/reverse';
 
 const normalizeText = (value: string) =>
   value

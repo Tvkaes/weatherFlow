@@ -1,6 +1,5 @@
 .weather-ui {
-  position: fixed;
-  inset: 0;
+  position: relative;
   z-index: 10;
   display: flex;
   flex-direction: column;
@@ -9,12 +8,20 @@
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: rgba(255, 255, 255, 0.95);
   pointer-events: none;
+  min-height: 100vh;
   overflow: hidden;
+  --card-bg: rgba(4, 6, 12, 0.45);
+  --card-border: rgba(255, 255, 255, 0.15);
+  --card-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
+  --card-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  --card-blur: blur(35px) saturate(130%);
 }
 
 .weather-ui::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.12), transparent 55%),
     radial-gradient(circle at 80% 10%, rgba(124, 175, 255, 0.2), transparent 45%),
@@ -34,13 +41,13 @@
   mix-blend-mode: screen;
   z-index: -1;
   opacity: 1;
-  transform: scale(1.35);
+  transform: scale(1.05);
   transition: opacity 1.2s ease, transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .portal-overlay--open {
   opacity: 0;
-  transform: scale(2.2);
+  transform: scale(1.3);
 }
 
 .portal-rim {
@@ -60,7 +67,7 @@
 
 @keyframes portalPulse {
   0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.08); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.6; }
   100% { transform: scale(1); opacity: 0.8; }
 }
 
@@ -295,32 +302,324 @@
 
 /* Main Content */
 .content-grid {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   gap: clamp(1rem, 3vw, 2.5rem);
+  justify-content: center;
   align-items: flex-start;
   min-height: 0;
+  width: min(1120px, 100%);
+  margin: 0 auto;
 }
 
 .main-content {
-  flex: 1 1 clamp(360px, 48%, 520px);
+  flex: 0 1 520px;
+  width: 100%;
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   min-height: 0;
+  margin-inline: auto;
 }
 
 .secondary-panel {
-  flex: 1 1 clamp(280px, 45%, 520px);
-  min-height: 320px;
+  flex: 0 1 420px;
+  width: 100%;
+  max-width: 420px;
+  margin-inline: auto;
+  min-height: 240px;
   display: flex;
+  flex-direction: column;
   align-items: stretch;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 1rem;
 }
 
 .secondary-panel__card {
   width: 100%;
   max-width: 520px;
+}
+
+
+.sun-cycle-card {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 1.2rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.sun-cycle-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  background: var(--card-highlight);
+  pointer-events: none;
+}
+
+.sun-cycle-card__item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sun-cycle-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.sun-cycle-card__label {
+  margin: 0;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  opacity: 0.55;
+}
+
+.sun-cycle-card__value {
+  margin: 0.1rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.secondary-panel__card + .sun-cycle-card {
+  margin-top: 0.25rem;
+}
+
+.insight-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.insight-card {
+  border-radius: 1.15rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
+}
+
+.insight-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.insight-card__eyebrow {
+  margin: 0;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+}
+
+.insight-card__header h3 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.insight-card--light {
+  background: var(--card-bg);
+}
+
+.comfort-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.comfort-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.comfort-chip {
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comfort-chip--frigid { border-color: rgba(146, 193, 255, 0.5); }
+.comfort-chip--cold { border-color: rgba(99, 164, 255, 0.5); }
+.comfort-chip--cool { border-color: rgba(111, 205, 255, 0.5); }
+.comfort-chip--comfortable { border-color: rgba(124, 255, 204, 0.5); }
+.comfort-chip--warm { border-color: rgba(255, 210, 140, 0.5); }
+.comfort-chip--oppressive { border-color: rgba(255, 140, 140, 0.6); }
+
+.comfort-card__summary {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+.comfort-card__meter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.comfort-card__meter-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.comfort-card__meter-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #6ad9ff, #9dffa7, #ffd480, #ff8b8b);
+}
+
+.comfort-card__meter-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+}
+
+.comfort-card__drivers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.comfort-card__drivers div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.comfort-card__drivers dt {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.6;
+}
+
+.comfort-card__drivers dd {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.comfort-card__tips {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  display: grid;
+  gap: 0.2rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.solar-widget {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.solar-widget__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.solar-widget__value {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.solar-widget__value span {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.solar-widget__value small {
+  font-size: 0.7rem;
+  opacity: 0.65;
+}
+
+.solar-widget__track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.solar-widget__gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 200, 90, 0.2), rgba(255, 255, 255, 0.25));
+}
+
+.solar-widget__sun {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fffbe8, #ffd469);
+  box-shadow:
+    0 0 12px rgba(255, 210, 120, 0.8),
+    0 0 30px rgba(255, 200, 90, 0.35);
+  transform: translateY(-50%);
+}
+
+.solar-widget__labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.solar-widget__labels span {
+  display: block;
+  opacity: 0.55;
+}
+
+.solar-widget__labels strong {
+  display: block;
+  font-size: 0.95rem;
+  letter-spacing: 0.03em;
 }
 
 .secondary-panel-fab {
@@ -381,23 +680,24 @@
   z-index: 25;
 }
 
+
 .wardrobe-card {
   border-radius: 1.35rem;
-  background: rgba(8, 11, 20, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: var(--card-blur);
   padding: 1.5rem;
   color: rgba(255, 255, 255, 0.9);
   display: flex;
   flex-direction: column;
-  min-height: 100%;
+  min-height: auto;
 }
 
 .secondary-panel .wardrobe-card {
-  background: rgba(10, 15, 25, 0.45);
-  backdrop-filter: blur(25px) saturate(135%);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  backdrop-filter: var(--card-blur);
 }
 
 .wardrobe-card--modal {
@@ -499,13 +799,11 @@
 
 .weather-card {
   padding: clamp(0.75rem, 2vw, 1.25rem);
-  background: rgba(4, 6, 12, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
   border-radius: 1.25rem;
-  backdrop-filter: blur(35px) saturate(130%);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: var(--card-blur);
+  box-shadow: var(--card-shadow);
   position: relative;
 }
 
@@ -514,7 +812,7 @@
   position: absolute;
   inset: 1px;
   border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 60%);
+  background: var(--card-highlight);
   pointer-events: none;
 }
 
@@ -635,7 +933,9 @@
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
-  padding-top: 0.5rem;
+  padding-top: 0.75rem;
+  margin-top: auto;
+  padding-bottom: 0.25rem;
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
