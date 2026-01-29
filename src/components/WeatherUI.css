@@ -1110,7 +1110,13 @@
   }
 
   .secondary-panel {
-    display: none;
+    order: 3;
+    padding: clamp(1rem, 4vw, 1.5rem);
+    gap: clamp(0.85rem, 3vw, 1.25rem);
+  }
+
+  .secondary-panel__card {
+    max-width: 100%;
   }
 
   .secondary-panel-fab {
